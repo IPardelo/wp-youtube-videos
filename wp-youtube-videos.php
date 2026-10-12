@@ -20,3 +20,13 @@ define( 'WPYTV_VERSION', '0.1.0' );
 define( 'WPYTV_FILE', __FILE__ );
 define( 'WPYTV_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WPYTV_URL', plugin_dir_url( __FILE__ ) );
+
+require_once WPYTV_DIR . 'includes/class-wpytv-fonte.php';
+require_once WPYTV_DIR . 'includes/class-wpytv-shortcode.php';
+
+add_action(
+	'plugins_loaded',
+	function () {
+		WPYTV_Shortcode::init();
+	}
+);
