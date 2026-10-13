@@ -1,0 +1,60 @@
+/* WP YouTube Vídeos */
+
+.wpytv {
+	--wpytv-columnas: 5;
+	--wpytv-oco: 8px;
+	--wpytv-cor-titulo: #555;
+	margin: 0 0 1.5em;
+}
+
+.wpytv-grella {
+	display: grid;
+	grid-template-columns: repeat(var(--wpytv-columnas), minmax(0, 1fr));
+	gap: 14px var(--wpytv-oco);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.wpytv-video {
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+}
+
+.wpytv-video[hidden] {
+	display: none;
+}
+
+.wpytv-ligazon {
+	display: block;
+	color: inherit;
+	text-decoration: none !important;
+}
+
+.wpytv-miniatura {
+	position: relative;
+	display: block;
+	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	background: #ddd;
+}
+
+.wpytv-miniatura img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	margin: 0;
+}
+
+.wpytv-titulo {
+	display: block;
+	margin-top: 4px;
+	font-size: 1.15em;
+	line-height: 1.25;
+	color: var(--wpytv-cor-titulo);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
