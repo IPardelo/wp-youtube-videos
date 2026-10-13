@@ -13,6 +13,8 @@ class WPYTV_Fonte {
 
 	const CABEZAS  = array(
 		'Accept-Language' => 'gl-ES,gl;q=0.9,es;q=0.8,en;q=0.7',
+		// Evita a pantalla de consentimento de cookies que YouTube amosa en Europa.
+		'Cookie'          => 'CONSENT=YES+cb; SOCS=CAI',
 	);
 
 	/**
