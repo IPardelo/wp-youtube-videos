@@ -64,6 +64,37 @@ class WPYTV_Fonte {
 			return $c['valor'];
 		}
 
+		$id_cache = 'wpytv_id_' . md5( strtolower( $c['tipo'] . $c['valor'] ) );
+		$gardado  = get_transient( $id_cache );
+		if ( $gardado ) {
+			return $gardado;
+		}
+
+		$url  = 'usuario' === $c['tipo']
+			? 'https://www.youtube.com/c/' . rawurlencode( $c['valor'] )
+			: 'https://www.youtube.com/@' . rawurlencode( $c['valor'] );
+		$resp = wp_remote_get(
+			$url,
+			array(
+				'timeout'    => 15,
+				'headers'    => self::CABEZAS,
+				'user-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36',
+			)
+		);
+		if ( is_wp_error( $resp ) ) {
+			return $resp;
+		}
+
+		$html = wp_remote_retrieve_body( $resp );
+		if (
+			preg_match( '~<link rel="canonical" href="https://www\.youtube\.com/channel/(UC[\w-]{22})"~', $html, $m ) ||
+			preg_match( '~"externalId":"(UC[\w-]{22})"~', $html, $m ) ||
+			preg_match( '~"channelId":"(UC[\w-]{22})"~', $html, $m )
+		) {
+			set_transient( $id_cache, $m[1], WEEK_IN_SECONDS );
+			return $m[1];
+		}
+
 		/* translators: %s: nome da canle */
 		return new WP_Error( 'wpytv_non_existe', sprintf( __( 'Non se atopou a canle «%s».', 'wp-youtube-videos' ), $canle ) );
 	}
