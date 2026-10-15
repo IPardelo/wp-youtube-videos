@@ -4,6 +4,7 @@
 	--wpytv-columnas: 5;
 	--wpytv-oco: 8px;
 	--wpytv-cor-titulo: #555;
+	--wpytv-cor-data: #333;
 	margin: 0 0 1.5em;
 }
 
@@ -57,4 +58,11 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.wpytv-data {
+	display: block;
+	font-size: .8em;
+	line-height: 1.3;
+	color: var(--wpytv-cor-data);
 }
