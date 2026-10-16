@@ -18,10 +18,13 @@ class WPYTV_Shortcode {
 
 	public static function rexistrar_recursos() {
 		wp_register_style( 'wp-youtube-videos', WPYTV_URL . 'assets/css/wp-youtube-videos.css', array(), WPYTV_VERSION );
+		wp_register_script( 'wp-youtube-videos', WPYTV_URL . 'assets/js/wp-youtube-videos.js', array(), WPYTV_VERSION, true );
+		wp_localize_script( 'wp-youtube-videos', 'wpytvTextos', self::textos_datas() );
 	}
 
 	/**
-	 * Textos das datas relativas.
+	 * Textos das datas relativas (tamén os usa o JS para mantelas ao día
+	 * aínda que a páxina estea en caché).
 	 */
 	private static function textos_datas() {
 		return array(
@@ -81,6 +84,8 @@ class WPYTV_Shortcode {
 				'canle'       => '',
 				'mostrar'     => 5,
 				'datas'       => 'si',      // si | non.
+				/* translators: %d: número de vídeos que quedan por mostrar */
+				'texto_boton' => __( '%d máis', 'wp-youtube-videos' ),
 			),
 			$atts,
 			'videos_youtube'
@@ -97,17 +102,21 @@ class WPYTV_Shortcode {
 		}
 
 		wp_enqueue_style( 'wp-youtube-videos' );
+		wp_enqueue_script( 'wp-youtube-videos' );
 
+		$total    = count( $videos );
+		$restan   = max( 0, $total - $mostrar );
+		$boton_tx = $a['texto_boton'];
 
 		ob_start();
 		?>
-		<div class="wpytv" style="--wpytv-columnas: <?php echo (int) $columnas; ?>;">
+		<div class="wpytv" data-mostrar="<?php echo esc_attr( $mostrar ); ?>" data-texto="<?php echo esc_attr( $boton_tx ); ?>" style="--wpytv-columnas: <?php echo (int) $columnas; ?>;">
 			<ul class="wpytv-grella">
-				<?php foreach ( array_slice( $videos, 0, $mostrar ) as $v ) : ?>
+				<?php foreach ( $videos as $i => $v ) : ?>
 					<?php
 					$url = 'https://www.youtube.com/watch?v=' . rawurlencode( $v['id'] );
 					?>
-					<li class="wpytv-video">
+					<li class="wpytv-video"<?php echo $i >= $mostrar ? ' hidden' : ''; ?>>
 						<a class="wpytv-ligazon" href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener" title="<?php echo esc_attr( $v['titulo'] ); ?>">
 							<span class="wpytv-miniatura">
 								<img src="<?php echo esc_url( $v['miniatura'] ); ?>" alt="" loading="lazy" width="320" height="180">
@@ -121,6 +130,9 @@ class WPYTV_Shortcode {
 					</li>
 				<?php endforeach; ?>
 			</ul>
+			<?php if ( $restan > 0 ) : ?>
+				<button type="button" class="wpytv-mais"><?php echo esc_html( str_replace( '%d', $restan, $boton_tx ) ); ?></button>
+			<?php endif; ?>
 		</div>
 		<?php
 		return trim( ob_get_clean() );

@@ -5,6 +5,9 @@
 	--wpytv-oco: 8px;
 	--wpytv-cor-titulo: #555;
 	--wpytv-cor-data: #333;
+	--wpytv-fondo-boton: #333;
+	--wpytv-cor-boton: #fff;
+	--wpytv-fondo-boton-hover: #111;
 	margin: 0 0 1.5em;
 }
 
@@ -25,6 +28,15 @@
 
 .wpytv-video[hidden] {
 	display: none;
+}
+
+.wpytv-video.wpytv-aparece {
+	animation: wpytv-aparecer .35s ease both;
+}
+
+@keyframes wpytv-aparecer {
+	from { opacity: 0; transform: translateY(6px); }
+	to   { opacity: 1; transform: none; }
 }
 
 .wpytv-ligazon {
@@ -65,4 +77,25 @@
 	font-size: .8em;
 	line-height: 1.3;
 	color: var(--wpytv-cor-data);
+}
+
+.wpytv-mais {
+	display: block;
+	width: 100%;
+	margin: 14px 0 0;
+	padding: 10px 16px;
+	border: 0;
+	border-radius: 0;
+	background: var(--wpytv-fondo-boton);
+	color: var(--wpytv-cor-boton);
+	font: inherit;
+	font-size: 1em;
+	cursor: pointer;
+	transition: background .2s ease;
+}
+
+.wpytv-mais:hover,
+.wpytv-mais:focus-visible {
+	background: var(--wpytv-fondo-boton-hover);
+	color: var(--wpytv-cor-boton);
 }
