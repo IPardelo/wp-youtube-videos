@@ -18,7 +18,7 @@ class WPYTV_Fonte {
 	);
 
 	/**
-	 * Devolve a lista de vídeos da canle.
+	 * Devolve a lista de vídeos da canle (con caché).
 	 *
 	 * @param string $canle  Nome (@canle), URL ou ID (UC…) da canle.
 	 * @param int    $maximo Número máximo de vídeos (0 = todos).
@@ -30,7 +30,32 @@ class WPYTV_Fonte {
 			return new WP_Error( 'wpytv_sen_canle', __( 'Non se indicou ningunha canle.', 'wp-youtube-videos' ) );
 		}
 
-		return self::desde_rss( $canle, (int) $maximo );
+		$axustes  = wpytv_axustes();
+		$id_cache = 'wpytv_' . md5( strtolower( $canle ) . '|' . (int) $maximo );
+
+		$gardado = get_transient( $id_cache );
+		if ( is_array( $gardado ) ) {
+			return $gardado;
+		}
+
+		$videos = self::desde_rss( $canle, (int) $maximo );
+
+		if ( is_wp_error( $videos ) ) {
+			return $videos;
+		}
+
+		$minutos = max( 5, (int) $axustes['cache'] );
+		set_transient( $id_cache, $videos, $minutos * MINUTE_IN_SECONDS );
+
+		return $videos;
+	}
+
+	/**
+	 * Borra toda a caché do plugin.
+	 */
+	public static function baleirar_cache() {
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_wpytv\_%' OR option_name LIKE '\_transient\_timeout\_wpytv\_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 
 	/* --------------------------------------------------------------------
