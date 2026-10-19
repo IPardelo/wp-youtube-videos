@@ -81,6 +81,10 @@ class WPYTV_Admin {
 				<?php submit_button(); ?>
 			</form>
 
+			<hr>
+			<h2><?php esc_html_e( 'Uso', 'wp-youtube-videos' ); ?></h2>
+			<p><code>[videos_youtube canle="@nomedacanle"]</code></p>
+			<p><code>[videos_youtube canle="@nomedacanle" mostrar="5" abrir="modal" texto_boton="%d máis"]</code></p>
 		</div>
 		<?php
 	}
