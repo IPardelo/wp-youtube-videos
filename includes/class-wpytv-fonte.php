@@ -71,6 +71,17 @@ class WPYTV_Fonte {
 	private static function interpretar( $canle ) {
 		$canle = trim( $canle );
 
+		// URL completa.
+		if ( preg_match( '~youtube\.com/(?:(channel)/([\w-]+)|@([\w.\-]+)|(?:c|user)/([\w.\-]+))~i', $canle, $m ) ) {
+			if ( ! empty( $m[2] ) ) {
+				return array( 'tipo' => 'id', 'valor' => $m[2] );
+			}
+			if ( ! empty( $m[3] ) ) {
+				return array( 'tipo' => 'handle', 'valor' => $m[3] );
+			}
+			return array( 'tipo' => 'usuario', 'valor' => $m[4] );
+		}
+
 		// ID de canle (UC + 22 caracteres).
 		if ( preg_match( '~^UC[\w-]{22}$~', $canle ) ) {
 			return array( 'tipo' => 'id', 'valor' => $canle );
