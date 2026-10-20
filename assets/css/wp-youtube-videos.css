@@ -59,6 +59,41 @@
 	height: 100%;
 	object-fit: cover;
 	margin: 0;
+	transition: transform .3s ease;
+}
+
+.wpytv-play {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 44px;
+	height: 30px;
+	margin: -15px 0 0 -22px;
+	border-radius: 8px;
+	background: rgba(0, 0, 0, .7);
+	opacity: 0;
+	transition: opacity .2s ease, background .2s ease;
+}
+
+.wpytv-play::after {
+	content: "";
+	position: absolute;
+	left: 18px;
+	top: 8px;
+	border-style: solid;
+	border-width: 7px 0 7px 12px;
+	border-color: transparent transparent transparent #fff;
+}
+
+.wpytv-ligazon:hover .wpytv-miniatura img,
+.wpytv-ligazon:focus-visible .wpytv-miniatura img {
+	transform: scale(1.05);
+}
+
+.wpytv-ligazon:hover .wpytv-play,
+.wpytv-ligazon:focus-visible .wpytv-play {
+	opacity: 1;
+	background: #f00;
 }
 
 .wpytv-titulo {
