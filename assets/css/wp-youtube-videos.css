@@ -99,3 +99,62 @@
 	background: var(--wpytv-fondo-boton-hover);
 	color: var(--wpytv-cor-boton);
 }
+
+/* Reprodutor emerxente */
+.wpytv-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 999999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	background: rgba(0, 0, 0, .85);
+	animation: wpytv-fundido .2s ease both;
+}
+
+@keyframes wpytv-fundido {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+.wpytv-modal-caixa {
+	position: relative;
+	width: min(1100px, 100%);
+	aspect-ratio: 16 / 9;
+	max-height: calc(100vh - 80px);
+	background: #000;
+}
+
+.wpytv-modal-caixa iframe {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border: 0;
+}
+
+.wpytv-modal-pechar {
+	position: absolute;
+	right: 0;
+	top: -42px;
+	width: 38px;
+	height: 38px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: #fff;
+	font-size: 32px;
+	line-height: 38px;
+	cursor: pointer;
+}
+
+.wpytv-modal-pechar:hover,
+.wpytv-modal-pechar:focus-visible {
+	background: rgba(255, 255, 255, .15);
+	color: #fff;
+}
+
+body.wpytv-sen-scroll {
+	overflow: hidden;
+}

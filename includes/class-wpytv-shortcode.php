@@ -41,6 +41,7 @@ class WPYTV_Shortcode {
 			'ano'     => __( 'hai 1 ano', 'wp-youtube-videos' ),
 			/* translators: %d: número de anos */
 			'anos'    => __( 'hai %d anos', 'wp-youtube-videos' ),
+			'pechar'  => __( 'Pechar', 'wp-youtube-videos' ),
 		);
 	}
 
@@ -83,6 +84,7 @@ class WPYTV_Shortcode {
 			array(
 				'canle'       => '',
 				'mostrar'     => 5,
+				'abrir'       => 'modal',   // modal | youtube.
 				'datas'       => 'si',      // si | non.
 				/* translators: %d: número de vídeos que quedan por mostrar */
 				'texto_boton' => __( '%d máis', 'wp-youtube-videos' ),
@@ -93,6 +95,7 @@ class WPYTV_Shortcode {
 
 		$mostrar  = max( 1, (int) $a['mostrar'] );
 		$columnas = min( $mostrar, 8 );
+		$modal    = 'youtube' !== strtolower( $a['abrir'] );
 		$datas    = ! in_array( strtolower( $a['datas'] ), array( 'non', 'no', '0', 'false' ), true );
 
 		$videos = WPYTV_Fonte::videos( $a['canle'] );
@@ -110,14 +113,14 @@ class WPYTV_Shortcode {
 
 		ob_start();
 		?>
-		<div class="wpytv" data-mostrar="<?php echo esc_attr( $mostrar ); ?>" data-texto="<?php echo esc_attr( $boton_tx ); ?>" style="--wpytv-columnas: <?php echo (int) $columnas; ?>;">
+		<div class="wpytv" data-mostrar="<?php echo esc_attr( $mostrar ); ?>" data-modal="<?php echo $modal ? '1' : '0'; ?>" data-texto="<?php echo esc_attr( $boton_tx ); ?>" style="--wpytv-columnas: <?php echo (int) $columnas; ?>;">
 			<ul class="wpytv-grella">
 				<?php foreach ( $videos as $i => $v ) : ?>
 					<?php
 					$url = 'https://www.youtube.com/watch?v=' . rawurlencode( $v['id'] );
 					?>
 					<li class="wpytv-video"<?php echo $i >= $mostrar ? ' hidden' : ''; ?>>
-						<a class="wpytv-ligazon" href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener" title="<?php echo esc_attr( $v['titulo'] ); ?>">
+						<a class="wpytv-ligazon" href="<?php echo esc_url( $url ); ?>" data-video="<?php echo esc_attr( $v['id'] ); ?>" target="_blank" rel="noopener" title="<?php echo esc_attr( $v['titulo'] ); ?>">
 							<span class="wpytv-miniatura">
 								<img src="<?php echo esc_url( $v['miniatura'] ); ?>" alt="" loading="lazy" width="320" height="180">
 								<span class="wpytv-play" aria-hidden="true"></span>
