@@ -135,6 +135,13 @@
 	color: var(--wpytv-cor-boton);
 }
 
+.wpytv-erro {
+	padding: .6em .9em;
+	border-left: 4px solid #d63638;
+	background: #fcf0f1;
+	font-size: .9em;
+}
+
 /* Reprodutor emerxente */
 .wpytv-modal {
 	position: fixed;
@@ -192,4 +199,8 @@
 
 body.wpytv-sen-scroll {
 	overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.wpytv *, .wpytv-modal { animation: none !important; transition: none !important; }
 }
