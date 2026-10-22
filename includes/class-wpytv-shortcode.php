@@ -84,6 +84,8 @@ class WPYTV_Shortcode {
 			array(
 				'canle'       => '',
 				'mostrar'     => 5,
+				'columnas'    => '',
+				'maximo'      => 0,
 				'abrir'       => 'modal',   // modal | youtube.
 				'datas'       => 'si',      // si | non.
 				/* translators: %d: número de vídeos que quedan por mostrar */
@@ -94,13 +96,20 @@ class WPYTV_Shortcode {
 		);
 
 		$mostrar  = max( 1, (int) $a['mostrar'] );
-		$columnas = min( $mostrar, 8 );
+		$columnas = $a['columnas'] ? max( 1, min( 8, (int) $a['columnas'] ) ) : min( $mostrar, 8 );
 		$modal    = 'youtube' !== strtolower( $a['abrir'] );
 		$datas    = ! in_array( strtolower( $a['datas'] ), array( 'non', 'no', '0', 'false' ), true );
 
-		$videos = WPYTV_Fonte::videos( $a['canle'] );
+		$videos = WPYTV_Fonte::videos( $a['canle'], max( 0, (int) $a['maximo'] ) );
 
-		if ( is_wp_error( $videos ) || empty( $videos ) ) {
+		if ( is_wp_error( $videos ) ) {
+			// Os visitantes non ven nada; os administradores ven o motivo.
+			if ( current_user_can( 'manage_options' ) ) {
+				return '<p class="wpytv-erro">[videos_youtube] ' . esc_html( $videos->get_error_message() ) . '</p>';
+			}
+			return '';
+		}
+		if ( empty( $videos ) ) {
 			return '';
 		}
 
