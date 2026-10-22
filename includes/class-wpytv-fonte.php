@@ -1,6 +1,9 @@
 <?php
 /**
- * Obtén os vídeos dunha canle de YouTube a partir do feed RSS público.
+ * Obtén os vídeos dunha canle de YouTube.
+ *
+ * Con clave da API de YouTube Data v3 → todos os vídeos da canle.
+ * Sen clave → feed RSS público (só os 15 últimos vídeos).
  *
  * @package WP_YouTube_Videos
  */
@@ -11,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class WPYTV_Fonte {
 
+	const API      = 'https://www.googleapis.com/youtube/v3/';
+	const MAX_PAX  = 60; // 60 páxinas × 50 = 3000 vídeos como moito.
 	const CABEZAS  = array(
 		'Accept-Language' => 'gl-ES,gl;q=0.9,es;q=0.8,en;q=0.7',
 		// Evita a pantalla de consentimento de cookies que YouTube amosa en Europa.
@@ -30,15 +35,19 @@ class WPYTV_Fonte {
 			return new WP_Error( 'wpytv_sen_canle', __( 'Non se indicou ningunha canle.', 'wp-youtube-videos' ) );
 		}
 
-		$axustes  = wpytv_axustes();
-		$id_cache = 'wpytv_' . md5( strtolower( $canle ) . '|' . (int) $maximo );
+		$axustes = wpytv_axustes();
+		$clave   = trim( $axustes['api_key'] );
+		$modo    = $clave ? 'api' : 'rss';
+		$id_cache = 'wpytv_' . md5( strtolower( $canle ) . '|' . $modo . '|' . (int) $maximo );
 
 		$gardado = get_transient( $id_cache );
 		if ( is_array( $gardado ) ) {
 			return $gardado;
 		}
 
-		$videos = self::desde_rss( $canle, (int) $maximo );
+		$videos = 'api' === $modo
+			? self::desde_api( $canle, $clave, (int) $maximo )
+			: self::desde_rss( $canle, (int) $maximo );
 
 		if ( is_wp_error( $videos ) ) {
 			return $videos;
@@ -88,6 +97,128 @@ class WPYTV_Fonte {
 		}
 
 		return array( 'tipo' => 'handle', 'valor' => ltrim( $canle, '@' ) );
+	}
+
+	/* --------------------------------------------------------------------
+	 * API de YouTube Data v3 → todos os vídeos
+	 * ------------------------------------------------------------------ */
+
+	private static function api( $recurso, $parametros, $clave ) {
+		$parametros['key'] = $clave;
+		$url  = add_query_arg( array_map( 'rawurlencode', $parametros ), self::API . $recurso );
+		$resp = wp_remote_get( $url, array( 'timeout' => 15 ) );
+
+		if ( is_wp_error( $resp ) ) {
+			return $resp;
+		}
+
+		$datos = json_decode( wp_remote_retrieve_body( $resp ), true );
+		if ( 200 !== wp_remote_retrieve_response_code( $resp ) ) {
+			$msx = isset( $datos['error']['message'] ) ? wp_strip_all_tags( $datos['error']['message'] ) : wp_remote_retrieve_response_code( $resp );
+			/* translators: %s: mensaxe de erro da API */
+			return new WP_Error( 'wpytv_api', sprintf( __( 'Erro da API de YouTube: %s', 'wp-youtube-videos' ), $msx ) );
+		}
+
+		return is_array( $datos ) ? $datos : new WP_Error( 'wpytv_api', __( 'Resposta da API non válida.', 'wp-youtube-videos' ) );
+	}
+
+	private static function desde_api( $canle, $clave, $maximo ) {
+		$c = self::interpretar( $canle );
+
+		$param = array( 'part' => 'contentDetails' );
+		if ( 'id' === $c['tipo'] ) {
+			$param['id'] = $c['valor'];
+		} elseif ( 'usuario' === $c['tipo'] ) {
+			$param['forUsername'] = $c['valor'];
+		} else {
+			$param['forHandle'] = '@' . $c['valor'];
+		}
+
+		$datos = self::api( 'channels', $param, $clave );
+		if ( is_wp_error( $datos ) ) {
+			return $datos;
+		}
+
+		// As URL /c/nome antigas ás veces non son "usuarios": probamos tamén como handle.
+		if ( empty( $datos['items'] ) && 'usuario' === $c['tipo'] ) {
+			$datos = self::api( 'channels', array( 'part' => 'contentDetails', 'forHandle' => '@' . $c['valor'] ), $clave );
+			if ( is_wp_error( $datos ) ) {
+				return $datos;
+			}
+		}
+
+		if ( empty( $datos['items'][0]['contentDetails']['relatedPlaylists']['uploads'] ) ) {
+			/* translators: %s: nome da canle */
+			return new WP_Error( 'wpytv_non_existe', sprintf( __( 'Non se atopou a canle «%s».', 'wp-youtube-videos' ), $canle ) );
+		}
+
+		$lista  = $datos['items'][0]['contentDetails']['relatedPlaylists']['uploads'];
+		$videos = array();
+		$token  = '';
+		$pax    = 0;
+
+		do {
+			$param = array(
+				'part'       => 'snippet,contentDetails,status',
+				'playlistId' => $lista,
+				'maxResults' => 50,
+			);
+			if ( $token ) {
+				$param['pageToken'] = $token;
+			}
+
+			$datos = self::api( 'playlistItems', $param, $clave );
+			if ( is_wp_error( $datos ) ) {
+				// Se xa temos algo, mostrámolo; se non, erro.
+				if ( $videos ) {
+					break;
+				}
+				return $datos;
+			}
+
+			foreach ( (array) $datos['items'] as $item ) {
+				if ( isset( $item['status']['privacyStatus'] ) && 'public' !== $item['status']['privacyStatus'] ) {
+					continue; // Privados ou eliminados.
+				}
+				$sn  = $item['snippet'];
+				$id  = isset( $item['contentDetails']['videoId'] ) ? $item['contentDetails']['videoId'] : '';
+				$dat = isset( $item['contentDetails']['videoPublishedAt'] ) ? $item['contentDetails']['videoPublishedAt'] : $sn['publishedAt'];
+				if ( ! $id ) {
+					continue;
+				}
+				$videos[] = array(
+					'id'        => $id,
+					'titulo'    => $sn['title'],
+					'data'      => strtotime( $dat ),
+					'miniatura' => self::miniatura( $id, isset( $sn['thumbnails'] ) ? $sn['thumbnails'] : array() ),
+				);
+				if ( $maximo && count( $videos ) >= $maximo ) {
+					break 2;
+				}
+			}
+
+			$token = isset( $datos['nextPageToken'] ) ? $datos['nextPageToken'] : '';
+			$pax++;
+		} while ( $token && $pax < self::MAX_PAX );
+
+		// A lista de subidas xa vén ordenada, pero aseguramos (máis recente primeiro).
+		usort(
+			$videos,
+			function ( $a, $b ) {
+				return $b['data'] - $a['data'];
+			}
+		);
+
+		return $videos;
+	}
+
+	private static function miniatura( $id, $miniaturas ) {
+		foreach ( array( 'medium', 'high', 'standard', 'default' ) as $tam ) {
+			if ( ! empty( $miniaturas[ $tam ]['url'] ) ) {
+				return $miniaturas[ $tam ]['url'];
+			}
+		}
+		return 'https://i.ytimg.com/vi/' . rawurlencode( $id ) . '/mqdefault.jpg';
 	}
 
 	/* --------------------------------------------------------------------
