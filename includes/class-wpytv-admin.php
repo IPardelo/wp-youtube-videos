@@ -14,6 +14,7 @@ class WPYTV_Admin {
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
 		add_action( 'admin_init', array( __CLASS__, 'rexistrar' ) );
+		add_action( 'admin_post_wpytv_baleirar', array( __CLASS__, 'baleirar' ) );
 		add_action( 'update_option_' . WPYTV_OPTION, array( 'WPYTV_Fonte', 'baleirar_cache' ) );
 	}
 
@@ -45,11 +46,25 @@ class WPYTV_Admin {
 		);
 	}
 
+	public static function baleirar() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Non tes permisos.', 'wp-youtube-videos' ) );
+		}
+		check_admin_referer( 'wpytv_baleirar' );
+		WPYTV_Fonte::baleirar_cache();
+		wp_safe_redirect( admin_url( 'options-general.php?page=wp-youtube-videos&baleirada=1' ) );
+		exit;
+	}
+
 	public static function paxina() {
 		$ax = wpytv_axustes();
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'YouTube Vídeos', 'wp-youtube-videos' ); ?></h1>
+
+			<?php if ( isset( $_GET['baleirada'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification ?>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Caché baleirada.', 'wp-youtube-videos' ); ?></p></div>
+			<?php endif; ?>
 
 			<form method="post" action="options.php">
 				<?php settings_fields( 'wpytv' ); ?>
@@ -79,6 +94,12 @@ class WPYTV_Admin {
 					</tr>
 				</table>
 				<?php submit_button(); ?>
+			</form>
+
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="wpytv_baleirar">
+				<?php wp_nonce_field( 'wpytv_baleirar' ); ?>
+				<?php submit_button( __( 'Baleirar caché', 'wp-youtube-videos' ), 'secondary', 'submit', false ); ?>
 			</form>
 
 			<hr>

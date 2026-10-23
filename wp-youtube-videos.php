@@ -43,9 +43,19 @@ function wpytv_axustes() {
 add_action(
 	'plugins_loaded',
 	function () {
+		load_plugin_textdomain( 'wp-youtube-videos', false, dirname( plugin_basename( WPYTV_FILE ) ) . '/languages' );
 		WPYTV_Shortcode::init();
 		if ( is_admin() ) {
 			WPYTV_Admin::init();
 		}
+	}
+);
+
+add_filter(
+	'plugin_action_links_' . plugin_basename( __FILE__ ),
+	function ( $ligazons ) {
+		$url = admin_url( 'options-general.php?page=wp-youtube-videos' );
+		array_unshift( $ligazons, '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Axustes', 'wp-youtube-videos' ) . '</a>' );
+		return $ligazons;
 	}
 );
