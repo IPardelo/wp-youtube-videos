@@ -50,11 +50,18 @@ class WPYTV_Fonte {
 			: self::desde_rss( $canle, (int) $maximo );
 
 		if ( is_wp_error( $videos ) ) {
+			// Se falla, usa a última copia boa (se existe) e volve tentalo en 5 minutos.
+			$respaldo = get_option( $id_cache . '_respaldo' );
+			if ( is_array( $respaldo ) ) {
+				set_transient( $id_cache, $respaldo, 5 * MINUTE_IN_SECONDS );
+				return $respaldo;
+			}
 			return $videos;
 		}
 
 		$minutos = max( 5, (int) $axustes['cache'] );
 		set_transient( $id_cache, $videos, $minutos * MINUTE_IN_SECONDS );
+		update_option( $id_cache . '_respaldo', $videos, false );
 
 		return $videos;
 	}
