@@ -98,6 +98,11 @@ class WPYTV_Fonte {
 			return array( 'tipo' => 'usuario', 'valor' => $m[4] );
 		}
 
+		// URL personalizada antiga: youtube.com/Nome (sen @ nin /c/). Hoxe redirixe ao identificador @Nome.
+		if ( preg_match( '~youtube\.com/(?!watch|feeds|playlist|results|shorts|embed)([\w.\-]+)(?:/(?:videos|featured|streams|shorts|playlists|about)?)?/?(?:[?#].*)?$~i', $canle, $m ) ) {
+			return array( 'tipo' => 'handle', 'valor' => $m[1] );
+		}
+
 		// ID de canle (UC + 22 caracteres).
 		if ( preg_match( '~^UC[\w-]{22}$~', $canle ) ) {
 			return array( 'tipo' => 'id', 'valor' => $canle );

@@ -22,7 +22,7 @@ Moitas webs (clubs, asociacións, medios locais) queren ensinar os últimos víd
 
 ## Funcionalidades
 
-- 🎬 **Só co nome da canle**: `@canle`, a URL completa ou o ID (`UC…`).
+- 🎬 **Só co nome da canle**: `@canle`, a URL completa (con ou sen `@`) ou o ID (`UC…`).
 - 🧱 **Grella de miniaturas** con título (recortado con «…») e data relativa («Hoxe», «Onte», «hai 2 días»…).
 - ➕ **Botón «N máis»** que vai descubrindo os seguintes vídeos de N en N.
 - ▶️ **Reprodutor emerxente** (`youtube-nocookie.com`) ou ligazón directa a YouTube.
@@ -154,6 +154,7 @@ wp-youtube-videos/
 
 | Versión | Data | Cambios |
 |---|---|---|
+| 1.0.1 | 2026-10-26 | Acepta tamén URL de canle sen `@` (p.ex. `youtube.com/RCDeportivo`) |
 | 1.0.0 | 2026-10-26 | Primeira versión: shortcode `[videos_youtube]`, API e RSS, caché, botón «máis» e reprodutor emerxente |
 
 ## Licenza
