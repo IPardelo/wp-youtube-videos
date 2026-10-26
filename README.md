@@ -1,10 +1,23 @@
 <div align="center">
 
-<img src="https://cdn.simpleicons.org/wordpress/21759B" alt="WordPress" width="64" height="64">
+<h1>
+    <table border="0">
+    <tr border="0">
+        <td align="center" valign="middle" border="0">
+        <picture>
+            <source media="(prefers-color-scheme: dark)" srcset="https://cdn.simpleicons.org/wordpress/white">
+            <img src="https://cdn.simpleicons.org/wordpress/black" width="50" height="50" alt="WordPress">
+        </picture>
+        </td>
+        <td valign="middle" border="0">
+        <strong>Wordpress</strong><br>
+        YouTube Videos
+        </td>
+    </tr>
+    </table>
+</h1>
 
-# WP YouTube Vídeos
-
-**Mostra os vídeos dunha canle de YouTube nunha grella con botón «máis», só co nome da canle e un shortcode.**
+**Mostra os vídeos dunha canle de YouTube na tua web**
 
 ![WordPress](https://img.shields.io/badge/WordPress-5.8%2B-21759B?logo=wordpress&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-7.4%2B-777BB4?logo=php&logoColor=white)
@@ -18,7 +31,7 @@
 
 ## Por que
 
-Moitas webs (clubs, asociacións, medios locais) queren ensinar os últimos vídeos da súa canle de YouTube sen ter que pegar os vídeos un a un. Este plugin fai iso: indicas o nome da canle e móstrase unha fila de miniaturas co título e a data, e un botón para ir vendo o resto.
+Moitas webs queren ensinar os últimos vídeos da súa canle de YouTube sen ter que pegar os vídeos un a un. Este plugin fai iso: indicas o nome da canle e móstrase unha fila de miniaturas co título e a data, e un botón para ir vendo o resto.
 
 ## Funcionalidades
 
